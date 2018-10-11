@@ -43,7 +43,7 @@ module.exports.getUserNameByEmail = function(email, cd) {
 	User.findOne({email: email}, cd);
 }
 
-module.exports.getUserNameById = function(id, cd) {
+module.exports.getUserById = function(id, cd) {
 	User.findById(id, cd);
 }
 

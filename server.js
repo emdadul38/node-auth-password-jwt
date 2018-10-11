@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
 // parse application/json
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 app.use(cors());
 
 
@@ -27,11 +27,11 @@ mongoose.connect(config.db, {
 });
 
 mongoose.Promise = global.Promise;
-
 require('./config/passport') (passport);
 
 app.use(passport.initialize());
 app.use(passport.session());
+
 require('./routes/routes')(app, passport);
 
 app.listen(port, function(){

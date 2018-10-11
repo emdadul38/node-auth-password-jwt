@@ -5,10 +5,10 @@ const config = require('../config/database');
 
 module.exports = function(app, passport){
 	app.get('/', function(req, res){
-		console.log('Welcome to the node app');
+		res.json({ success: true, message: 'Welcome to the node app' });
 	});
 
-	app.post('/signup', function(req, res, next){
+	app.post('/signup', function(req, res){
 		var newUser = new User({
 			email: req.body.email,
 			password: req.body.password
@@ -22,37 +22,44 @@ module.exports = function(app, passport){
 		});
 	});
 
-	app.post('/login', function(req, res, next){
+	app.post('/login', function(req, res){
 		const email = req.body.email;
 		const password = req.body.password;
 
 		User.getUserNameByEmail(email, function(err, user){
 			if (err)
 				throw err;
-			if(user) {
-				User.comparePassword(password, user.password, function(err, isMatch){
-					if(isMatch && !err) {
-	                	let token = jwt.sign({email: user.email}, config.secret, {expiresIn: 60000 });
 
+			if(!user) {
+				res.json({ 'success': false, message: ' No User Found !! '});
+			}
 
-	                	res.json({success : true, token: 'JWT '+token, user: {
+			User.comparePassword(password, user.password, function(err, isMatch){
+				if(isMatch && !err) {
+                	let token = jwt.sign(user.toJSON(), config.secret, {
+                		expiresIn: 600000 
+                	});
+
+	                res.json({success : true, token: 'JWT '+token, user: {
 	                		email: email,
 	                		password: password
-	                	}});
-	                }else{
-	            		res.json({ 'success': false, message: ' Auth faild !! '});    	
-	                }
-	           	});
-
-			}else {
-				res.json({ 'success': false, message: ' Auth faild !! '});
-			}
-			
+	                	}
+                	});
+                }else{
+            		res.json({ 'success': false, message: ' Auth faild !! '});    	
+                }
+           	});			
 		});
 	});
-	app.get('/profile', passport.authenticate('jwt', {session: false}), function(req, res, next){
+	app.get('/profile', passport.authenticate('jwt', {session: false }), function(req, res){
+		
 		res.json({
-			user: user.req
-		})
+			user: req.user.email
+		});
+	});
+
+	app.get('/logout', function(req, res) {
+		req.logout();
+		res.redirect('/');
 	});
 }
